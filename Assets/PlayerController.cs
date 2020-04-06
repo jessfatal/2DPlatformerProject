@@ -6,6 +6,7 @@ public class PlayerController : MonoBehaviour
 {
 
     private Animator myAnimator;
+    private Rigidbody2D rb;
 
     public float moveSpeed = 5f;
     public float jumpHeight = 5f;
@@ -16,6 +17,7 @@ public class PlayerController : MonoBehaviour
     {
         facingRight = true;
         myAnimator = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody2D>();
     }
 
     void Update()
@@ -24,19 +26,44 @@ public class PlayerController : MonoBehaviour
         float horizontal = Input.GetAxis("Horizontal");
         Vector3 movement = new Vector3(horizontal, 0f, 0f);
         transform.position += movement * Time.deltaTime * moveSpeed;
+        Debug.Log( rb.velocity.y+"");
 
         Flip(horizontal);
 
         myAnimator.SetFloat("speed", Mathf.Abs(horizontal));
+
+        if (rb.velocity.y == 0)
+        {
+            myAnimator.SetBool("isJumping", false);
+            myAnimator.SetBool("isFalling", false);
+            myAnimator.SetBool("isGrounded", true);
+
+        }
+
+        if (rb.velocity.y > 0)
+        {
+            myAnimator.SetBool("isJumping", true);
+            myAnimator.SetBool("isSkipping", false);
+            myAnimator.SetBool("isGrounded", false);
+        }
+
+        bool isSkip = myAnimator.GetBool("isGrounded");
+
+        if (rb.velocity.y < 0 &&  !isSkip)
+        {
+            myAnimator.SetBool("isJumping", false);
+            myAnimator.SetBool("isFalling", true);
+            myAnimator.SetBool("isGrounded", false);
+        }
     }
 
-    void Jump() 
+    void Jump()
     {
-        if (Input.GetButtonDown("Jump") && isGrounded == true) 
+        if (Input.GetButtonDown("Jump") && isGrounded == true)
         {
             gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(0f, jumpHeight), ForceMode2D.Impulse);
         }
-        
+
 
     }
 
